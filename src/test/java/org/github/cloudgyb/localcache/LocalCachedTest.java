@@ -8,9 +8,7 @@ import org.junit.Test;
  * Unit test for LocalCached.
  */
 public class LocalCachedTest {
-    /**
-     * Rigorous Test :-)
-     */
+
     @Test
     public void getLocalCache() {
         LocalCached localCached = LocalCached.getLocalCached();

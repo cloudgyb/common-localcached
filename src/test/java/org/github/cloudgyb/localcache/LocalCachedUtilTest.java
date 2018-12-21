@@ -2,6 +2,7 @@ package org.github.cloudgyb.localcache;
 
 import com.alibaba.fastjson.JSON;
 import org.github.cloudgyb.localcache.entity.User;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ public class LocalCachedUtilTest {
 
     @BeforeClass
     public static void beforeTest(){
+        LocalCachedUtil.startCache();
         //判断数据是否按照预期的被清除
         new Thread(new Runnable() {
             @Override
@@ -52,7 +54,7 @@ public class LocalCachedUtilTest {
         String s = JSON.toJSONString(user);
         LocalCachedUtil.put("user",s);
     }
-    @Test
+    /*@Test*/
     public void test4(){
         User user = LocalCachedUtil.get(LocalCached.DEFAULT_CACHED_BLOCKNAME,"user", User.class);
         System.out.println(user);
@@ -63,8 +65,8 @@ public class LocalCachedUtilTest {
         }
 
     }
-    /*@AfterClass
+    @AfterClass
     public static void afterTest(){
-        System.out.println(Runtime.getRuntime().freeMemory());
-    }*/
+        LocalCachedUtil.stopCache();
+    }
 }

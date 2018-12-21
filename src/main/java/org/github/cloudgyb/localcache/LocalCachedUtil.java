@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * @Author: 耿远博
- * @Date: 2018/9/20
+ * @author 耿远博
+ * @date 2018/9/20
  */
 public class LocalCachedUtil {
     /**
@@ -15,10 +15,35 @@ public class LocalCachedUtil {
      */
     private LocalCachedUtil(){}
 
-    static{
+    /**
+     * 通过更改这个属性控制缓存清理线程的状态
+     */
+    private static volatile boolean isCacheTimerRunning = true;
+
+    /**
+     * 启动清理缓存线程
+     * 在Web项目中一般在servlet容器启动时调用
+     * 可以在servlet，filter，listener的初始化时调用
+     */
+    public static void startCache(){
         //启动清理过期缓存的线程
         new CacheTimer(LocalCached.getLocalCached()).start();
     }
+
+    /**
+     * 停止缓存清理线程
+     * 在Web项目中一般在servlet容器关闭时调用
+     * 可以在servlet，filter，listener的销毁时调用
+     */
+    public static void stopCache(){
+        isCacheTimerRunning = false;
+        try{
+            Thread.sleep(10*1000); //等待缓存清理线程退出
+        }catch (InterruptedException ie){
+            ie.printStackTrace();
+        }
+    }
+
     /**
      * 将数据放入对应的缓存块中
      * 当cachedTime <=0时，代表数据永不过期
@@ -120,7 +145,7 @@ public class LocalCachedUtil {
         @Override
         public void run() {
             System.out.println("定时轮询删除过期的缓存开始......");
-            while(true) {
+            while(isCacheTimerRunning) {
                 Map<String,LocalCachedBlock> blockMap = localCached.getCacheMap();
                 Iterator<String> blockMapIter = blockMap.keySet().iterator();
                 while (blockMapIter.hasNext()) {
@@ -147,6 +172,7 @@ public class LocalCachedUtil {
                 }
                 System.out.println("1次轮询结束。。。");
             }
+            System.out.println("定时轮询删除过期的缓存停止成功......");
         }
     }
 
